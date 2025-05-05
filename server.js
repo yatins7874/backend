@@ -21,6 +21,7 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/favorites", require("./routes/favoriteRoutes"));  // Add the favorite routes here
 app.use("/api/ratings", require("./routes/ratingRoutes"));
+app.use('/api/inquiries', require('./routes/inquiryRoutes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
