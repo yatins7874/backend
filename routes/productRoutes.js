@@ -7,7 +7,8 @@ const {
   getProductsByCategory,
   deleteProduct,
   getMyProducts,
-  updateProduct
+  updateProduct,
+  getTopRatedProducts
 } = require('../controllers/productController');
 
 const { protect } = require('../middleware/authMiddleware');
@@ -18,6 +19,7 @@ router.get('/category/:category', getProductsByCategory);
 router.delete('/:id', protect, deleteProduct);
 router.get('/myproducts', protect, getMyProducts);
 router.put('/:id', protect, updateProduct);
+router.get('/top-rated', getTopRatedProducts)
 
 router.get('/:id', async (req, res) => {
   try {

@@ -1,13 +1,13 @@
-const Product = require('../models/ProductModel'); // fixed filename
-
+const Product = require('../models/ProductModel');
+const Rating = require('../models/RatingModel');
 exports.createProduct = async (req, res) => {
   try {
-    const { title, materials, instructions, category, image } = req.body;
+    const { title, materials, description, category, image } = req.body;
 
     const product = new Product({
       title,
       materials,
-      instructions,
+      description,
       category,
       image,
       farmer: req.user ? req.user._id : null,
@@ -67,10 +67,11 @@ exports.updateProduct = async (req, res) => {
       return res.status(401).json({ message: "Not authorized to update this product" });
     }
 
-    const { title, materials, category, image } = req.body;
+    const { title, materials, description, category, image } = req.body;
 
     product.title = title || product.title;
     product.materials = materials || product.materials;
+    product.description = description || product.description;
     product.category = category || product.category;
     product.image = image || product.image;
 
@@ -91,3 +92,49 @@ exports.getMyProducts = async (req, res) => {
   }
 };
 
+exports.getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate('farmer', 'name email'); // Example to populate farmer details if needed
+    if (!product) return res.status(404).send({ message: 'Product not found' });
+
+    res.json(product);
+  } catch (err) {
+    console.error('Error fetching product:', err);
+    res.status(500).send({ message: 'Server error' });
+  }
+};
+
+exports.getTopRatedProducts = async (req, res) => {
+  try {
+    const topRatedProducts = await Product.aggregate([
+      {
+        $lookup: {
+          from: 'ratings',  // ratings collection
+          localField: '_id',  // field from products
+          foreignField: 'productId',  // field from ratings
+          as: 'ratings'
+        }
+      },
+      {
+        $project: {
+          title: 1,
+          image: 1,
+          description: 1,
+          price: 1,
+          avgRating: { $avg: '$ratings.stars' },
+        }
+      },
+      {
+        $sort: { avgRating: -1 }  // Sort by average rating in descending order
+      },
+      {
+        $limit: 5  // Get top 5 rated products
+      }
+    ]);
+
+    res.json(topRatedProducts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
