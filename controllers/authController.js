@@ -5,7 +5,7 @@ const User = require("../models/UserModel");
 
 // Register
 exports.register = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, phone, password, role } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -16,6 +16,7 @@ exports.register = async (req, res) => {
     const newUser = new User({
       name,
       email,
+      phone,
       password: hashedPassword,
       role,
     });
